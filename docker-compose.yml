@@ -1,0 +1,89 @@
+services:
+  client-public:
+    build: './template'
+    hostname: ClientPublic
+    privileged: true
+    container_name: client-public
+    networks:
+      clientpub_router:
+        ipv4_address: "192.168.100.100"
+    command: tail -f /dev/null
+
+  client-private:
+    build: './template'
+    hostname: ClientPrivate
+    privileged: true
+    container_name: client-private
+    networks:
+      server_net:
+        ipv4_address: "192.168.50.101"
+    command: tail -f /dev/null
+
+  server-private:
+    build: './server-template'
+    hostname: ServerPrivate
+    privileged: true
+    container_name: server-private
+    networks:
+      server_net:
+        ipv4_address: "192.168.50.100"
+    ports:
+      - 80:80
+
+  vpn-server:
+    build: './template'
+    hostname: VpnServer
+    privileged: true
+    container_name: vpn-server
+    networks:
+      vpnserver_router:
+        ipv4_address: "200.200.200.200"
+      server_net:
+        ipv4_address: "192.168.50.2"
+    command: tail -f /dev/null
+
+  router1:
+    build: './template'
+    hostname: router1
+    privileged: true
+    container_name: router1
+    networks:
+      border_router:
+        ipv4_address: "100.100.100.100"
+      clientpub_router:
+        ipv4_address: "192.168.100.2"
+    command: tail -f /dev/null
+
+  router2:
+    build: './template'
+    hostname: router2
+    privileged: true
+    container_name: router2
+    networks:
+      border_router:
+        ipv4_address: "100.100.200.200"
+      vpnserver_router:
+        ipv4_address: "200.200.200.2"
+    command: tail -f /dev/null
+
+
+networks:
+  clientpub_router:
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+
+  server_net:
+    ipam:
+      config:
+        - subnet: 192.168.50.0/24
+
+  border_router:
+    ipam:
+      config:
+        - subnet: 100.100.0.0/16
+
+  vpnserver_router:
+    ipam:
+      config:
+        - subnet: 200.200.0.0/16
