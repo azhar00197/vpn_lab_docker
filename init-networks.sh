@@ -16,13 +16,11 @@ docker exec -it --privileged vpn-server ip route add 100.100.0.0/16 via 200.200.
 docker exec -it --privileged client-private ip route del default
 docker exec -it --privileged client-private ip route add default via 192.168.50.2
 
-# SET DEFAULT GATEWAY FOR SERVER PRIVATE
-docker exec -it --privileged server-private ip route del default
-docker exec -it --privileged server-private ip route add default via 192.168.50.2
-
 # SETUP CLIENT SSH
-SSH_KEY=$(docker exec -it --privileged client-public bash -c "if test -f "/root/.ssh/id_ed25519"; then echo "1"; else echo "0"; fi")
-if [ $SSH_KEY = "0" ]; then
+SSH_KEY=$(docker exec -it --privileged client-public bash -c "if test -f "/root/.ssh/id_ed25519"; then echo "yes"; fi")
+echo $SSH_KEY
+if [ -z $SSH_KEY ]; then
+    echo "Creating new SSH pair keys..."
     docker exec -it --privileged client-public ssh-keygen -t ed25519 -N "" -f /root/.ssh/id_ed25519
 fi
 SSH_PUB=$(docker exec -it --privileged client-public cat /root/.ssh/id_ed25519.pub)
